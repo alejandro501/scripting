@@ -1,0 +1,213 @@
+#!/bin/bash
+
+############################################################
+# Help                                                     #
+############################################################
+Help()
+{
+   # Display Help
+   echo "Add description of the script functions here."
+   echo
+   echo "Syntax: scriptTemplate [-k|r|v]"
+   echo "options:"
+   echo "k     Parameter / must be given to generate links."
+   echo "r     Print links in raw mode for piping or copying."
+   echo "v     Print links in verbose mode for browsing and picking."
+   echo
+}
+
+Raw()
+{
+    echo "https://github.com/search?q=%22$key%22+password&type=Code"
+    echo "https://github.com/search?q=%22$key%22+npmrc%20_auth&type=Code"
+    echo "https://github.com/search?q=%22$key%22+dockercfg&type=Code"
+    echo "https://github.com/search?q=%22$key%22+pem%20private&type=Code"
+    echo "https://github.com/search?q=%22$key%22+id_rsa&type=Code"
+    echo "https://github.com/search?q=%22$key%22+aws_access_key_id&type=Code"
+    echo "https://github.com/search?q=%22$key%22+s3cfg&type=Code"
+    echo "https://github.com/search?q=%22$key%22+htpasswd&type=Code"
+    echo "https://github.com/search?q=%22$key%22+git-credentials&type=Code"
+    echo "https://github.com/search?q=%22$key%22+bashrc%20password&type=Code"
+    echo "https://github.com/search?q=%22$key%22+sshd_config&type=Code"
+    echo "https://github.com/search?q=%22$key%22+xoxp%20OR%20xoxb%20OR%20xoxa&type=Code"
+    echo "https://github.com/search?q=%22$key%22+SECRET_KEY&type=Code"
+    echo "https://github.com/search?q=%22$key%22+client_secret&type=Code"
+    echo "https://github.com/search?q=%22$key%22+sshd_config&type=Code"
+    echo "https://github.com/search?q=%22$key%22+github_token&type=Code"
+    echo "https://github.com/search?q=%22$key%22+api_key&type=Code"
+    echo "https://github.com/search?q=%22$key%22+FTP&type=Code"
+    echo "https://github.com/search?q=%22$key%22+app_secret&type=Code"
+    echo "https://github.com/search?q=%22$key%22+passwd&type=Code"
+    echo "https://github.com/search?q=%22$key%22+.env&type=Code"
+    echo "https://github.com/search?q=%22$key%22+.exs&type=Code"
+    echo "https://github.com/search?q=%22$key%22+beanstalkd.yml&type=Code"
+    echo "https://github.com/search?q=%22$key%22+deploy.rake&type=Code"
+    echo "https://github.com/search?q=%22$key%22+mysql&type=Code"
+    echo "https://github.com/search?q=%22$key%22+credentials&type=Code"
+    echo "https://github.com/search?q=%22$key%22+PWD&type=Code"
+    echo "https://github.com/search?q=%22$key%22+deploy.rake&type=Code"
+    echo "https://github.com/search?q=%22$key%22+.bash_history&type=Code"
+    echo "https://github.com/search?q=%22$key%22+.sls&type=Code"
+    echo "https://github.com/search?q=%22$key%22+secrets&type=Code"
+    echo "https://github.com/search?q=%22$key%22+composer.json&type=Code"
+    echo "https://github.com/search?q=%22$key%22+composer.json&type=Code"
+}
+
+Verbose()
+{
+  echo " password "
+  echo "https://github.com/search?q=%22$key%22+password&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+password&type=Code"
+  echo ""
+  echo " npmrc _auth "
+  echo "https://github.com/search?q=%22$key%22+npmrc%20_auth&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+npmrc%20_auth&type=Code"
+  echo ""
+  echo " dockercfg "
+  echo "https://github.com/search?q=%22$key%22+dockercfg&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+dockercfg&type=Code"
+  echo ""
+  echo " pem private "
+  echo "https://github.com/search?q=%22$key%22+pem%20private&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+extension:pem%20private&type=Code"
+  echo ""
+  echo " id_rsa "
+  echo "https://github.com/search?q=%22$key%22+id_rsa&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+id_rsa&type=Code"
+  echo ""
+  echo " aws_access_key_id"
+  echo "https://github.com/search?q=%22$key%22+aws_access_key_id&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+aws_access_key_id&type=Code"
+  echo ""
+  echo " s3cfg"
+  echo "https://github.com/search?q=%22$key%22+s3cfg&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+s3cfg&type=Code"
+  echo ""
+  echo " htpasswd"
+  echo "https://github.com/search?q=%22$key%22+htpasswd&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+htpasswd&type=Code"
+  echo ""
+  echo " git-credentials"
+  echo "https://github.com/search?q=%22$key%22+git-credentials&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+git-credentials&type=Code"
+  echo ""
+  echo " bashrc password"
+  echo "https://github.com/search?q=%22$key%22+bashrc%20password&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+bashrc%20password&type=Code"
+  echo ""
+  echo " sshd_config"
+  echo "https://github.com/search?q=%22$key%22+sshd_config&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+sshd_config&type=Code"
+  echo ""
+  echo " xoxp OR xoxb OR xoxa"
+  echo "https://github.com/search?q=%22$key%22+xoxp%20OR%20xoxb%20OR%20xoxa&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+xoxp%20OR%20xoxb&type=Code"
+  echo ""
+  echo " SECRET_KEY"
+  echo "https://github.com/search?q=%22$key%22+SECRET_KEY&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+SECRET_KEY&type=Code"
+  echo ""
+  echo " client_secret"
+  echo "https://github.com/search?q=%22$key%22+client_secret&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+client_secret&type=Code"
+  echo ""
+  echo " sshd_config"
+  echo "https://github.com/search?q=%22$key%22+sshd_config&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+sshd_config&type=Code"
+  echo ""
+  echo " github_token"
+  echo "https://github.com/search?q=%22$key%22+github_token&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+github_token&type=Code"
+  echo ""
+  echo " api_key"
+  echo "https://github.com/search?q=%22$key%22+api_key&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+api_key&type=Code"
+  echo ""
+  echo " FTP"
+  echo "https://github.com/search?q=%22$key%22+FTP&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+FTP&type=Code"
+  echo ""
+  echo " app_secret"
+  echo "https://github.com/search?q=%22$key%22+app_secret&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+app_secret&type=Code"
+  echo ""
+  echo "  passwd"
+  echo "https://github.com/search?q=%22$key%22+passwd&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+passwd&type=Code"
+  echo ""
+  echo " s3.yml"
+  echo "https://github.com/search?q=%22$key%22+.env&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+.env&type=Code"
+  echo ""
+  echo " .exs"
+  echo "https://github.com/search?q=%22$key%22+.exs&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+.exs&type=Code"
+  echo ""
+  echo " beanstalkd.yml"
+  echo "https://github.com/search?q=%22$key%22+beanstalkd.yml&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+beanstalkd.yml&type=Code"
+  echo ""
+  echo " deploy.rake"
+  echo "https://github.com/search?q=%22$key%22+deploy.rake&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+deploy.rake&type=Code"
+  echo ""
+  echo " mysql"
+  echo "https://github.com/search?q=%22$key%22+mysql&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+mysql&type=Code"
+  echo ""
+  echo " credentials"
+  echo "https://github.com/search?q=%22$key%22+credentials&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+credentials&type=Code"
+  echo ""
+  echo " PWD"
+  echo "https://github.com/search?q=%22$key%22+PWD&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+PWD&type=Code"
+  echo ""
+  echo " deploy.rake"
+  echo "https://github.com/search?q=%22$key%22+deploy.rake&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+deploy.rake&type=Code"
+  echo ""
+  echo " .bash_history"
+  echo "https://github.com/search?q=%22$key%22+.bash_history&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+.bash_history&type=Code"
+  echo ""
+  echo " .sls"
+  echo "https://github.com/search?q=%22$key%22+.sls&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+PWD&type=Code"
+  echo ""
+  echo " secrets"
+  echo "https://github.com/search?q=%22$key%22+secrets&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+secrets&type=Code"
+  echo ""
+  echo " composer.json "
+  echo "https://github.com/search?q=%22$key%22+composer.json&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+composer.json&type=Code"
+  echo ""
+  echo " admin "
+  echo "https://github.com/search?q=%22$key%22+composer.json&type=Code"
+  echo "https://github.com/search?q=%22$without_suffix%22+admin&type=Code"
+  echo ""
+}
+
+############################################################
+# main                                                     #
+############################################################
+# Get the options
+while getopts "k:hrv" option; do
+   case $option in
+      k) # Enter a keyword
+         key=$OPTARG;;
+      h) # display help
+         Help
+         exit;;
+      r) # display raw output
+         Raw
+         exit;;
+      v) # display verbose output
+         Verbose
+         exit;;
+     \?) # Invalid option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
