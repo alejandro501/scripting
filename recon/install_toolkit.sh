@@ -6,16 +6,17 @@ run_install() {
 check_install() {
   # apt-get install golang-go
   # apt-get install curl
+  # apt-get install golang-go
+      # export GOPATH="$HOME/go"
+      # PATH="$GOPATH/bin:$PATH"
 
+  # go install github.com/ffuf/ffuf@latest
   # go install github.com/tomnomnom/assetfinder@latest
   # go install -v github.com/tomnomnom/anew@latest
   # go install github.com/tomnomnom/httprobe@latest
   # go install github.com/tomnomnom/httprobe@master
     # only master has the --prefer-https flag as of today
   # go install github.com/tomnomnom/fff@latest
-    # apt-get install golang-go
-        # export GOPATH="$HOME/go"
-        # PATH="$GOPATH/bin:$PATH"
   # go install github.com/tomnomnom/gf@latest
     # mkdir ~/.gf && cp ~/go/path/to/examples/* ~/.gf/
   # go install github.com/tomnomnom/hacks/html-tool@latest
@@ -32,12 +33,15 @@ check_install() {
   dpkg -s "${REQUIRED_LIBRARIES[@]}" >/dev/null 2>&1 || run_install
 }
 
+check_resources(){
+echo "Checking if resources exist"
+# https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configfiles
+}
+
 get_resources(){
 # SecLists
-cd /home/$USER
-
-git clone https://github.com/danielmiessler/SecLists.git
-
+git clone https://github.com/danielmiessler/SecLists.git /home/$USER/wordlists/
+wget https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configfiles /home/$USER/wordlists/
 }
 
 main() {
