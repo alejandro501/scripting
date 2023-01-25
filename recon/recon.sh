@@ -1,49 +1,7 @@
 #!/bin/bash
 ##### Technologies / preprequisites #####
 
-run_install() {
-  apt-get install "${REQUIRED_APT_LIBRARIES[@]}"
-}
-check_install() {
-  # apt-get install golang-go
-
-  #apt-get install curl
-
-  # go install github.com/tomnomnom/assetfinder@latest
-  # go install -v github.com/tomnomnom/anew@latest
-  # go install github.com/tomnomnom/httprobe@latest
-  # go install github.com/tomnomnom/httprobe@master
-    # only master has the --prefer-https flag as of today
-  # go install github.com/tomnomnom/fff@latest
-    # apt-get install golang-go
-        # export GOPATH="$HOME/go"
-        # PATH="$GOPATH/bin:$PATH"
-  # go install github.com/tomnomnom/gf@latest
-    # mkdir ~/.gf && cp ~/go/path/to/examples/* ~/.gf/
-  # go install github.com/tomnomnom/hacks/html-tool@latest
-  # go install github.com/tomnomnom/waybackurls@latest
-
-  # findomain
-    # curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip
-    # unzip findomain-linux-i386.zip
-    # chmod +x findomain
-    # sudo mv findomain /usr/bin/findomain
-
-  REQUIRED_APT_LIBRARIES=("golang-go curl")
-  REQUIRED_GO_LIBRARIES=("github.com/tomnomnom/assetfinder")
-  dpkg -s "${REQUIRED_LIBRARIES[@]}" >/dev/null 2>&1 || run_install
-}
-
-get_wordlists(){
-cd ~/wordlists/
-wget https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configfiles
-cd ~/recon/
-}
-
-check_wordlists(){
-echo "Checking if resources exist"
-# https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configfiles
-}
+$ROOT_FOLDER = '~/home/$USER/recon'
 
 generate_dorks(){
 # todo: generate stuff
@@ -53,7 +11,7 @@ echo 'Generate dorks under construction.';
 }
 
 get_uncommon_headers(){
-echo "Getting uncommon headers, under construction."
+echo "[a/] Getting uncommon headers, under construction."
 
 cd roots/
 # TODO: Function for extracting uncommon headers
@@ -72,40 +30,72 @@ gf servers | anew servers.txt | sort
 cd ..
 }
 
+search_wayback_urls(){
+echo "[a/] Gathering wayback urls into wayback_urls.txt..."
+cat wildcards | waybackurls | anew wayback_urls.txt | sort
+
+echo "[b/] {UNDER CONSTRUCTION} Gathering wayback urls into wayback_urls.txt..."
+# todo: preg-match js files into wayback_js_urls.txt
+
+# echo "[c/] Diving for some waybackurls with versions into wayback_urls_versions.txt into sites-js-versions folder..."
+# cat wayback_js_urls.txt | waybackurls --get-versions | fff -s 200 -d 10 -k -o sites-js-versions
+
+cd sites-js-versions/web.archive.org/web/
+find . -type f -name *.body
+
+echo "[d/] {UNDER CONSTRUCTION} Gathering url's and diffing all with in-scope.."
+cd $ROOT_FOLDER/roots
+gf urls > ../all_urls.txt
+cat all_urls.txt | inscope > inscope_urls
+diff all_urls inscope_urls
+
+cd $ROOT_FOLDER
+}
+
 i_recon(){
+  # ./generate_dorks.sh
+
 DIRPATH=$(date +%d-%m-%Y)
 mkdir ${DIRPATH}
-mkdir ${DIRPATH}/wayback-urls
 
-echo "Gathering subdomains with assetfinder into domains file..."
+echo "[1/] Gathering subdomains with assetfinder into domains.txt..."
 # TODO: Make another txt for api specific url's
 cat wildcards | assetfinder --subs-only | anew domains.txt
 # TODO: Remove special characters from start of domains
 # TODO: Add wildcard domains to new file -- recursively
 
+echo "[2/] Gathering subdomains with finodmain into findomain.out..."
 findomain -f wildcards | tee -a findomain.out
 
+echo "[3/] Cutting non domain-related text from findomains.out to findomains.txt..."
 # TODO: Make another txt for api specific url's
 grep -v -E '^$|Searching in the|Target ==>|Job finished|Good luck Hax0r|Rate limit set to' findomain.out | sort | anew findomain.txt
 
-cat findomain.txt | anew domains.txt | httprobe -c 50 --prefer-https | anew hosts.txt
+echo "[4/] Adding new domains from findomain.txt to domains.txt, http probing, creating hosts.txt..."
+cat findomain.txt | anew domains.txt | httprobe -c 50 --prefer-https | anew hosts.txt | sort
 
+echo "[5/] Gathering headers/bodies to roots folder from hosts.txt..."
 cat hosts.txt | fff -d 1 -S -o roots
 
+echo "[6/] Investigating uncommon headers..."
 # get_uncommon_headers
 
-cat wildcards | waybackurls | anew urls.txt | sort
+echo "[7/] Combining hosts with configfiles wordlist for all hosts, all possibilities..."
+comb hosts.txt ~/wordlists/configfiles | fff -s 200 -o configfiles
+# comb <(echo https://domain.com) ~/wordlists/configfiles | fff -s 200 -o configfiles
 
+echo "[7/] Fuzzing all host with craft-large-files into fuzz_large_files.json..."
+ffuf -w ~/SecLists/Discovery/Web-Content/raft-large-files.txt:DIR -w hosts.txt:DOMAIN -u "DOMAIN/DIR" -o fuzz_large_files.json
+
+echo "[8/] Diving for some waybackurls content..."
+# search_wayback_urls
 }
 
 #content discovery
 
+
 main() {
-  # run_install
-  # get_wordlists
-  # check_install
-  # check_resources
-  generate_dorks
+  # ./install_toolkit.sh
   i_recon
 }
 
