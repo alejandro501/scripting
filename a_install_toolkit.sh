@@ -107,18 +107,25 @@ install_findomain(){
     fi
 }
 
+check_executables(){
+local root_dir="./"
+for file in $(find $root_dir -type f -name "*.sh"); do
+    if [ ! -x "$file" ]; then
+        chmod +x "$file"
+        echo "Made $file executable"
+    else
+        echo "$file is already executable"
+    fi
+done
+}
+
 get_resources(){
-# Loop through the array of resources
 for resource in "${RESOURCES[@]}"
 do
-    # Check if the resource exists in /usr/share
     if [ ! -f ~/resources/"$resource" ]; then
-        # If the resource doesn't exist, download it to the ~/usr/share/ directory
         wget -P ~/resources/ "$resource"
-        # Check if the resource is a zip file
         if [ ${resource: -4} == ".zip" ]; then
             unzip ~/resources/"$resource" -d ~/resources/
-        # Check if the resource is a tar.gz file
         elif [ ${resource: -7} == ".tar.gz" ]; then
             tar -xzvf ~/resources/"$resource" -C ~/resources/
         fi
@@ -137,5 +144,6 @@ main(){
     install_go_libs
     check_go_libs
     install_findomain
+    check_executables
     get_resources
 }
