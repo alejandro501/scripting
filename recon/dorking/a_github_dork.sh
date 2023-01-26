@@ -14,6 +14,7 @@ is_output_file_missing() {
 
 raw() {
 local keyword=$1
+
 if is_output_file_missing github_dork_links_verbose.txt; then
 while read -r line; do
   modified_line="${GITHUB[start]}${keyword}%22+${line}${GITHUB[end]}"
@@ -31,6 +32,16 @@ if is_output_file_missing github_dork_links_verbose.txt; then
     echo "" >> github_dork_links_verbose.txt
   done < github_keywords.txt
 fi
+}
+
+check_directory(){
+local dirname = $1
+
+if [ ! -d "$dirname" ]; then
+    mkdir "$dirname"
+    echo "Directory $dirname for github dorks created."
+fi
+
 }
 
 usage() {
@@ -77,6 +88,10 @@ do
   fi
 done
 
+if [ -n "$param" ]; then
+    check_directory "$param"
+fi
+
 if [ "$flag" == "raw" ]; then
   raw $param
 elif [ "$flag" == "verbose" ]; then
@@ -87,4 +102,4 @@ elif [ "$flag" == "all" ]; then
 else
   echo "Invalid flag provided"
   help
-fi 
+fi
