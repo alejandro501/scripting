@@ -176,28 +176,22 @@ connect_to_github() {
 }
 
 configure_github(){
-
-# Check if config file exists, if not create it
 config_file=config.txt
 if [ ! -f $config_file ]; then
   touch $config_file
 fi
 
-# Check if git_username and github_email are already in the config file
 if grep -q "github_username" "$config_file" && grep -q "github_email" "$config_file"; then
-  # If they are, read the values from the config file
   github_username=$(grep "github_username" $config_file | cut -d "=" -f 2)
   github_email=$(grep "github_email" $config_file | cut -d "=" -f 2)
 else
-  # If they are not, ask the user to input the values
   read -p "Enter your github username: " github_username
   read -p "Enter your GitHub email address: " github_email
-  # Store the values in the config file
+
   echo "github_username=$github_username" >> $config_file
   echo "github_email=$github_email" >> $config_file
 fi
 
-# Check if git_username and github_email are already configured as git global variables
 if ! git config --global --get-all user.name | grep -q "$github_username"; then
   git config --global user.name "$github_username"
 fi
@@ -256,6 +250,19 @@ else
 fi
 }
 
+add_scripts_to_path(){
+mkdir -p "/home/$USER/scripts"
+mkdir -p "/home/$USER/config"
+
+export PATH=$PATH:/home/$USER/scripts:/home/$USER/config >> /home/$USER/.bashrc
+
+source /home/$USER/.bashrc
+
+cp messsage_discord.sh message_discord
+mv message_discord /home/$USER/scripts
+
+}
+
 main(){
     create_logs
     update_system
@@ -272,5 +279,8 @@ main(){
     configure_discord
     get_resources
     check_executables
+    add_scripts_to_path
     ./scheduler.sh
+
+    message_discord "Install complete, welcome to your new environment!"
 }
