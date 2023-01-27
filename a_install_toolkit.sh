@@ -284,3 +284,5 @@ main(){
 
     message_discord "Install complete, welcome to your new environment!"
 }
+
+main
