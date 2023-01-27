@@ -1,3 +1,10 @@
 .idea/
 
-targets/
+config.txt
+
+target_list
+targets/*
+
+!sample_target_list
+!targets/sample-target-1/
+!targets/sample-target-2/
