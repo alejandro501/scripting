@@ -268,8 +268,9 @@ main(){
     install_go_libs
     check_go_libs
     install_findomain
-    check_executables
     configure_github
     configure_discord
     get_resources
+    check_executables
+    ./scheduler.sh
 }
