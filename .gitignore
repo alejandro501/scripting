@@ -1,5 +1,10 @@
 .idea/
 
+# ignore file executability
+*.[oa]
+*~
+-x
+
 config.txt
 
 debug.log
