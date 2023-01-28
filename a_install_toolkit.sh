@@ -25,14 +25,14 @@ RESOURCES=("https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configf
 # Test function that generates an error
 test_error_function() {
     # Some code that generates an error
-    echo "This is a test function testing error log."
+    color_me -c light-orange "This is a test function testing error log."
     non_existent_command
 }
 
 # Test function that generates debug messages
 test_debug_function() {
     # Some code that generates a debug message
-    echo "This is a test function"
+    color_me -c light-orange "This is a test function"
     log_debug "Debug message in test function" "$(basename "$0")" "test_debug_function"
 }
 
@@ -41,7 +41,7 @@ log_error() {
     error_message=$1
     error_file=$2
     error_function=$3
-    echo "$(date +%Y-%m-%d\ %H:%M:%S) - $error_file - $error_function - $error_message" >> error.log
+    color_me -c red "$(date +%Y-%m-%d\ %H:%M:%S) - $error_file - $error_function - $error_message" >> error.log
 }
 
 # Define a global function that logs debug messages
@@ -50,7 +50,7 @@ log_debug() {
     debug_file=$2
     debug_function=$3
     if [ "$LOG_LEVEL" == "debug" ]; then
-        echo "$(date +%Y-%m-%d\ %H:%M:%S) - $debug_file - $debug_function - $debug_message" >> debug.log
+        color_me -c light-orange "$(date +%Y-%m-%d\ %H:%M:%S) - $debug_file - $debug_function - $debug_message" >> debug.log
     fi
 }
 
@@ -64,7 +64,7 @@ if [ ! -f debug.log ]; then
 fi
 
 # Call the error test function and catch errors
-(test_error_function) || { log_error "$(echo $?)" "$(basename "$0")" "test_error_function"; }
+(test_error_function) || { log_error "$(color_me -c red $?)" "$(basename "$0")" "test_error_function"; }
 
 export -f log_error
 export -f log_debug
@@ -91,10 +91,10 @@ install_apt_libs() {
     for lib in "${APT_LIBS[@]}"
     do
         if ! dpkg-query -W -f='${Status}' $lib 2>/dev/null | grep "ok installed" > /dev/null; then
-            echo "Installing $lib"
+            color_me -c light-blue "Installing $lib"
             sudo apt install -y $lib
             if [ $? -ne 0 ]; then
-                echo "$lib installation failed"
+                color_me -c red "$lib installation failed"
                 exit 1
             fi
         fi
@@ -105,7 +105,7 @@ install_apt_libs() {
 install_golang() {
     sudo apt install golang-go -y
     if [ $? -ne 0 ]; then
-        echo "Golang installation failed"
+        color_me -c red "Golang installation failed"
         exit 1
     fi
 }
@@ -121,10 +121,10 @@ add_go_to_path() {
 install_go_libs() {
     for lib in "${GO_LIBS[@]}"
     do
-        echo "Installing $lib"
+        color_me -c light-blue "Installing $lib"
         go install $lib
         if [ $? -ne 0 ]; then
-            echo "$lib installation failed"
+            color_me -c red "$lib installation failed"
             exit 1
         fi
     done
@@ -137,10 +137,10 @@ install_go_libs() {
 check_go_libs() {
     for lib in "${GO_LIBS[@]}"
     do
-        echo "Checking $lib"
+        color_me -c light-blue "Checking $lib"
         go test $lib
         if [ $? -ne 0 ]; then
-            echo "$lib is not working"
+            color_me -c red "$lib is not working"
             exit 1
         fi
     done
@@ -148,14 +148,14 @@ check_go_libs() {
 
 install_findomain(){
     if [ -f "/usr/bin/findomain" ]; then
-      echo "findomain is already installed"
+      color_me -c light-green "findomain is already installed"
     else
-      echo "findomain not found, installing..."
+      color_me -c light-orange "findomain not found, installing..."
       sudo curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip
       unzip findomain-linux-i386.zip
       chmod +x findomain-linux-i386
       sudo mv findomain-linux-i386 /usr/bin/findomain
-      echo "findomain installed!"
+      color_me -c green "findomain installed!"
     fi
 }
 
@@ -164,9 +164,9 @@ local root_dir="./"
 for file in $(find $root_dir -type f -name "*.sh"); do
     if [ ! -x "$file" ]; then
         chmod +x "$file"
-        echo "Made $file executable"
+        color_me -c green "Made $file executable"
     else
-        echo "$file is already executable"
+        color_me -c light-orange "$file is already executable"
     fi
 done
 }
@@ -204,15 +204,15 @@ connect_to_github
 
 # check if ssh connection is valid
 if [ $? -eq 1 ]; then
-  echo "Invalid ssh connection, please check your ssh key and try again"
+  color_me -c red "Invalid ssh connection, please check your ssh key and try again"
 else
-  echo "Successfully connected to GitHub via SSH"
+  color_me -c green "Successfully connected to GitHub via SSH"
 fi
 }
 
 get_resources(){
 mkdir -p "~/resources/"
-echo "Directory 'resources' created or already exists."
+color_me -c green "Directory 'resources' created or already exists."
 
 for resource in "${RESOURCES[@]}"
 do
@@ -244,9 +244,9 @@ source config.txt
 response=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "{\"content\":\"Connection established from $(hostname)\"}" $discord_webhook)
 
 if [ $response -eq 204 ]; then
-    echo "Webhook established successfully."
+    color_me -c green "Webhook established successfully."
 else
-    echo "Error: Webhook not established. Response code: $response"
+    color_me -c red "Error: Webhook not established. Response code: $response"
 fi
 }
 
@@ -263,6 +263,8 @@ mv color_me.sh /home/$USER/scripts/color_me
 }
 
 main(){
+    check_executables
+    add_scripts_to_path
     create_logs
     update_system
     upgrade_system
@@ -277,8 +279,6 @@ main(){
     configure_github
     configure_discord
     get_resources
-    check_executables
-    add_scripts_to_path
     ./scheduler.sh
 
     message_discord "Install complete, welcome to your new environment!"

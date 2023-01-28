@@ -39,7 +39,7 @@ local dirname = $1
 
 if [ ! -d "$dirname" ]; then
     mkdir "$dirname"
-    echo "Directory $dirname for github dorks created."
+    message_me -c green "Directory $dirname for github dorks created."
 fi
 
 }
@@ -60,13 +60,13 @@ help() {
 }
 
 if [ $# -lt 1 ]; then
-    echo "Error: missing keyword"
+    message_me -c red "Error: missing keyword"
     usage
     exit 1
 fi
 
 if [ $# -gt 3 ]; then
-    echo "Error: too many arguments"
+    message_me -c red "Error: too many arguments"
     usage
     exit 1
 fi
@@ -100,6 +100,6 @@ elif [ "$flag" == "all" ]; then
   raw "$param"
   verbose "$param"
 else
-  echo "Invalid flag provided"
+  message_me -c red "Invalid flag provided"
   help
 fi

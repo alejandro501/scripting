@@ -16,9 +16,9 @@ message_discord() {
     curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"$1\"}" $webhook_url
 
     if [ $? -eq 0 ]; then
-        echo "Message sent successfully."
+        color_me -c purple "Discord message sent successfully."
     else
-        echo "Error sending message."
+        color_me -c red "Error sending discord message."
     fi
 }
 

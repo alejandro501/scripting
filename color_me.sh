@@ -19,6 +19,7 @@ colors=(
   "light-purple"
   "light-cyan"
   "light-white"
+  "light-orange"
 )
 
 # function to display help message
