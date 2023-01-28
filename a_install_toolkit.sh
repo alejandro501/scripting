@@ -22,6 +22,10 @@ RESOURCES=("https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configf
            "https://gist.githubusercontent.com/alejandro501/66ac773af3579e72bf634b9cae0796a5/raw/6eb238f9f011ab9c94c13b340c8b38d142735bdd/common-headers-large.txt"
           )
 
+BINARIES =("https://github.com/ffuf/ffuf/releases/tag/v1.5.0"
+           "https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip"
+          )
+
 # Test function that generates an error
 test_error_function() {
     # Some code that generates an error
@@ -146,17 +150,26 @@ check_go_libs() {
     done
 }
 
-install_findomain(){
-    if [ -f "/usr/bin/findomain" ]; then
-      color_me -c light-green "findomain is already installed"
-    else
-      color_me -c light-orange "findomain not found, installing..."
-      sudo curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip
-      unzip findomain-linux-i386.zip
-      chmod +x findomain-linux-i386
-      sudo mv findomain-linux-i386 /usr/bin/findomain
-      color_me -c green "findomain installed!"
+# for ffuf and findomain for now.
+install_binaries(){
+for url in "${BINARIES[@]}"
+do
+    filename=$(basename "$url")
+    if [[ $url == *"ffuf"* ]]; then
+        wget $url -O $filename
+        tar -xvf $filename
+        rm -f $filename
+        cd ffuf*
+        mv ffuf /usr/local/bin/
+        cd ..
+        rm -rf ffuf*
+    elif [[ $url == *"findomain"* ]]; then
+        wget $url -O $filename
+        unzip $filename
+        rm -f $filename
+        mv findomain-linux-i386 /usr/local/bin/findomain
     fi
+done
 }
 
 check_executables(){
@@ -278,11 +291,10 @@ main(){
     cleanup_system
     install_apt_libs
     install_golang
-    install_golang
     add_go_to_path
     install_go_libs
+    install_binaries
     check_go_libs
-    install_findomain
     configure_github
     configure_discord
     get_resources
