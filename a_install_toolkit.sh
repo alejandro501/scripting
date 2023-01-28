@@ -260,7 +260,7 @@ source /home/$USER/.bashrc
 
 cp message_discord.sh message_discord
 if [ ! -f "$scripts_path/message_discord" ]; then
-mv messsage_discord $scripts_path
+mv message_discord $scripts_path
 fi
 
 cp color_me.sh color_me
