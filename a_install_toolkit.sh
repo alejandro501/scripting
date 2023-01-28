@@ -3,9 +3,9 @@
 APT_LIBS=()
 
 # httprobe: only master has the --prefer-https flag as of today
+# ffuf install issue!
 GO_LIBS=(   "github.com/ffuf/ffuf@latest"
             "github.com/tomnomnom/assetfinder@latest"
-            "github.com/dgrijalva/jwt-go"
             "github.com/tomnomnom/anew@latest"
             "github.com/tomnomnom/httprobe@master"
             "github.com/tomnomnom/fff@latest"
@@ -130,7 +130,7 @@ install_go_libs() {
     done
 
     # Create an additional directory for gf since it's needed for usage
-    mkdir ~/.gf && cp $(find $GOPATH -name "examples")/* -type d ~/.gf/
+    mkdir -p ~/.gf && cp $(find $GOPATH -name "examples")/* -type d ~/.gf/
 }
 
 # check if the Go libraries are working
@@ -258,9 +258,8 @@ export PATH=$PATH:/home/$USER/scripts:/home/$USER/config >> /home/$USER/.bashrc
 
 source /home/$USER/.bashrc
 
-cp messsage_discord.sh message_discord
-mv message_discord /home/$USER/scripts
-
+mv messsage_discord.sh /home/$USER/scripts/message_discord
+mv color_me.sh /home/$USER/scripts/color_me
 }
 
 main(){
