@@ -2,6 +2,9 @@
 
 config.txt
 
+debug.log
+error.log
+
 target_list
 targets/*
 
