@@ -64,7 +64,7 @@ if [ ! -f debug.log ]; then
 fi
 
 # Call the error test function and catch errors
-(test_error_function) || { log_error "$(color_me -c red $?)" "$(basename "$0")" "test_error_function"; }
+# (test_error_function) || { log_error "$(color_me -c red $?)" "$(basename "$0")" "test_error_function"; }
 
 export -f log_error
 export -f log_debug
@@ -164,9 +164,7 @@ local root_dir="./"
 for file in $(find $root_dir -type f -name "*.sh"); do
     if [ ! -x "$file" ]; then
         chmod +x "$file"
-        color_me -c green "Made $file executable"
-    else
-        color_me -c light-orange "$file is already executable"
+        echo "Made $file executable"
     fi
 done
 }
@@ -251,15 +249,24 @@ fi
 }
 
 add_scripts_to_path(){
-mkdir -p "/home/$USER/scripts"
-mkdir -p "/home/$USER/config"
+local scripts_path="/home/$USER/scripts/"
+local config_path="/home/$USER/config/"
 
-export PATH=$PATH:/home/$USER/scripts:/home/$USER/config >> /home/$USER/.bashrc
+mkdir -p $scripts_path
+mkdir -p $config_path
 
+export PATH="$PATH:$scripts_path:$config_path"
 source /home/$USER/.bashrc
 
-mv messsage_discord.sh /home/$USER/scripts/message_discord
-mv color_me.sh /home/$USER/scripts/color_me
+cp message_discord.sh message_discord
+if [ ! -f "$scripts_path/message_discord" ]; then
+mv messsage_discord $scripts_path
+fi
+
+cp color_me.sh color_me
+if [ ! -f "$scripts_path/color_me" ]; then
+mv color_me $scripts_path
+fi
 }
 
 main(){
