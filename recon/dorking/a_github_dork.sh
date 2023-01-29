@@ -35,11 +35,11 @@ fi
 }
 
 check_directory(){
-local dirname = $1
+local dirname=$1
 
 if [ ! -d "$dirname" ]; then
     mkdir "$dirname"
-    message_me -c green "Directory $dirname for github dorks created."
+    color_me green "Directory $dirname for github dorks created."
 fi
 
 }
@@ -60,13 +60,13 @@ help() {
 }
 
 if [ $# -lt 1 ]; then
-    message_me -c red "Error: missing keyword"
+    color_me red "Error: missing keyword"
     usage
     exit 1
 fi
 
 if [ $# -gt 3 ]; then
-    message_me -c red "Error: too many arguments"
+    color_me red "Error: too many arguments"
     usage
     exit 1
 fi
@@ -100,6 +100,6 @@ elif [ "$flag" == "all" ]; then
   raw "$param"
   verbose "$param"
 else
-  message_me -c red "Invalid flag provided"
+  color_me red "Invalid flag provided"
   help
 fi

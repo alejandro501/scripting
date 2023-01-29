@@ -3,18 +3,20 @@
 ROOT=$PWD
 
 generate_dorks(){
+mkdir -p $TARGET/dorking
+color_me yellow "Creating dorking folder if it doesn't exist."
 while read line; do
     echo "$line" | awk -F. '{print $1}'
 done < $TARGET/wildcards > $TARGET/dorking/${wildcards%.*}_dork
 
-cat $TARGET/dorking/${wildcards%.*}_dork | xargs -I {} $TARGET/dorking/a_github_dork.sh {}
+cat $TARGET/dorking/${wildcards%.*}_dork | xargs -I {} $ROOT/dorking/a_github_dork.sh {}
 # cat ./dorking/${wildcards%.*}_dork | xargs -I {} ./dorking/a_google_dork.sh {}
 
-message_me -c green 'Dorking complete.';
+color_me -c green 'Dorking complete.';
 }
 
 get_uncommon_headers(){
-message_me -c light-blue "[a/] Getting uncommon headers, under construction."
+color_me -c light-blue "[a/] Getting uncommon headers, under construction."
 
 cd $DATE/roots
 
@@ -30,19 +32,19 @@ cd $DATE
 }
 
 search_wayback_urls(){
-message_me -c light-blue "[a/] Gathering wayback urls into wayback_urls.txt..."
+color_me -c light-blue "[a/] Gathering wayback urls into wayback_urls.txt..."
 cat wildcards | waybackurls | anew wayback_urls.txt | sort
 
-message_me -c light-blue "[b/] {UNDER CONSTRUCTION} Gathering wayback urls into wayback_urls.txt..."
+color_me -c light-blue "[b/] {UNDER CONSTRUCTION} Gathering wayback urls into wayback_urls.txt..."
 grep -E "(js|javascript)" wayback_urls.txt > wayback_js_urls.txt
 
-message_me -c light-blue "[c/] Diving for some waybackurls with versions into wayback_urls_versions.txt into sites-js-versions folder..."
+color_me -c light-blue "[c/] Diving for some waybackurls with versions into wayback_urls_versions.txt into sites-js-versions folder..."
 cat wayback_js_urls.txt | waybackurls --get-versions | fff -s 200 -d 10 -k -o sites-js-versions
 
 cd sites-js-versions/web.archive.org/web/
 find . -type f -name *.body
 
-message_me -c light-blue "[d/] Gathering url's and diffing all with in-scope.."
+color_me -c light-blue "[d/] Gathering url's and diffing all with in-scope.."
 cd $TARGET/roots
 gf urls > ../all_urls.txt | sort
 
@@ -50,33 +52,34 @@ gf urls > ../all_urls.txt | sort
 }
 
 i_recon(){
-local target = $1
+color_me yellow "Let's start"
+local target=$1
 
-mkdir -p "$target"
-message_me -c green "Directory $target created or already exists."
+mkdir -p $PWD/targets/$target
+color_me green "Directory $target created or already exists."
 
-TARGET=$PWD/target
+TARGET=$PWD/targets/$target
 
 mkdir -p $TARGET/$(date +"%Y-%m-%d")
 DATE=$(cd $TARGET && pwd)/$(date +"%Y-%m-%d")
 
-message_me -c blue "[0/] Generating dorks..."
+color_me blue "[0/] Generating dorks..."
 generate_dorks
 
 cd $DATE
 
-message_me -c blue "[1/] Gathering subdomains with assetfinder into domains.txt..."
+color_me -c blue "[1/] Gathering subdomains with assetfinder into domains.txt..."
 cat $TARGET/wildcards | assetfinder --subs-only | anew domains.txt | sed -r 's/^[^a-zA-Z0-9]+//'
 
-message_me -c blue "[2/] Gathering subdomains with finodmain into findomain.out..."
+color_me -c blue "[2/] Gathering subdomains with finodmain into findomain.out..."
 findomain -f wildcards | tee -a findomain.out
 
-message_me -c blue "[3/] Cutting non domain-related text from findomains.out to findomains.txt..."
+color_me -c blue "[3/] Cutting non domain-related text from findomains.out to findomains.txt..."
 grep -v -E '^$|Searching in the|Target ==>|Job finished|Good luck Hax0r|Rate limit set to' findomain.out | sort | anew findomain.txt
 
 grep "api" domains.txt > api_domains.txt
 
-message_me -c blue "[4/] Adding new domains from findomain.txt to domains.txt, http probing, creating hosts.txt..."
+color_me -c blue "[4/] Adding new domains from findomain.txt to domains.txt, http probing, creating hosts.txt..."
 cat findomain.txt | anew domains.txt | httprobe -c 50 --prefer-https | anew hosts.txt | sort
 
 if [ -f $TARGET/out-of-scope]; then
@@ -91,28 +94,34 @@ fi
 
 grep "api" hosts.txt > api_hosts.txt
 
-message_me -c blue "[5/] Gathering headers/bodies to roots folder from hosts.txt..."
+color_me -c blue "[5/] Gathering headers/bodies to roots folder from hosts.txt..."
 cat hosts.txt | fff -d 1 -S -o roots
 cat api_hosts.txt | fff -d 1 -S -o api_roots
 
-message_me -c blue "[6/] Investigating uncommon headers..."
+color_me -c blue "[6/] Investigating uncommon headers..."
 get_uncommon_headers
 
-message_me -c blue "[7/] Combining hosts with configfiles wordlist for all hosts, all possibilities..."
+color_me -c blue "[7/] Combining hosts with configfiles wordlist for all hosts, all possibilities..."
 comb hosts.txt ~/resources/configfiles | fff -s 200 -o configfiles
 
-message_me -c blue "[8/] Fuzzing all host with craft-large-files into fuzz_large_files.json..."
+color_me -c blue "[8/] Fuzzing all host with craft-large-files into fuzz_large_files.json..."
 ffuf -w ~/resources/SecLists/Discovery/Web-Content/raft-large-files.txt:DIR -w hosts.txt:DOMAIN -u "DOMAIN/DIR" -o fuzz_large_files.json
 
-message_me -c blue "[9/] Diving for some waybackurls content..."
+color_me -c blue "[9/] Diving for some waybackurls content..."
 search_wayback_urls
 
 cd $ROOT
 }
 
 main() {
-  cat sample_target_list | xargs -I {} bash -c 'i_recon "{}"'
-  # cat target_list | xargs -I {} bash -c 'i_recon "{}"'
+    # For demo purposes change target_list to sample_target_list
+    if [ $(wc -l < target_list) -eq 0 ] && [ -n "$(head -1 target_list)" ]; then
+        i_recon $(head -1 target_list)
+    else
+        while read line; do
+            i_recon "$line"
+        done < target_list
+    fi
 }
 
 main
