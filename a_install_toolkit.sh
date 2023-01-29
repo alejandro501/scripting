@@ -4,8 +4,7 @@ APT_LIBS=()
 
 # httprobe: only master has the --prefer-https flag as of today
 # ffuf install issue!
-GO_LIBS=(   "github.com/ffuf/ffuf@latest"
-            "github.com/tomnomnom/assetfinder@latest"
+GO_LIBS=(   "github.com/tomnomnom/assetfinder@latest"
             "github.com/tomnomnom/anew@latest"
             "github.com/tomnomnom/httprobe@master"
             "github.com/tomnomnom/fff@latest"
@@ -16,13 +15,12 @@ GO_LIBS=(   "github.com/ffuf/ffuf@latest"
         )
 
 RESOURCES=("https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configfiles"
-           "https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configfiles"
            "https://gist.githubusercontent.com/alejandro501/b74499c764ec8b77c6579320db97c073/raw/4ddc1ebf8a08a55094ac71c488c8851d74db5df7/common-headers-small.txt"
            "https://gist.githubusercontent.com/alejandro501/fd7c2e16d957ef01662ed9e7f6eb2115/raw/e3f3b8c825853eb491a5730f5ecb2be4ae63a03c/common-headers-medium.txt"
            "https://gist.githubusercontent.com/alejandro501/66ac773af3579e72bf634b9cae0796a5/raw/6eb238f9f011ab9c94c13b340c8b38d142735bdd/common-headers-large.txt"
           )
 
-BINARIES =("https://github.com/ffuf/ffuf/releases/tag/v1.5.0"
+BINARIES=("https://github.com/ffuf/ffuf/releases/tag/v1.5.0"
            "https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip"
           )
 
@@ -58,6 +56,41 @@ log_debug() {
     fi
 }
 
+add_scripts_to_path(){
+    local scripts_path="$HOME/scripts/"
+    local config_path="$HOME/config/"
+
+    mkdir -p $scripts_path
+    mkdir -p $config_path
+
+    export PATH=$PATH:$HOME/scripts:$HOME/config
+    echo "export PATH=$PATH:$HOME/scripts:$HOME/config" >> ~/.bashrc
+    source ~/.bashrc
+    source ~/.profile
+
+    touch $config_path/credentials.conf
+
+    cp message_discord.sh message_discord
+
+    if [ ! -f "$scripts_path/message_discord" ]; then
+    mv message_discord $scripts_path
+    fi
+
+    cp color_me.sh color_me
+    if [ ! -f "$scripts_path/color_me" ]; then
+    mv color_me $scripts_path
+    fi
+
+    # cleanup
+    [ -f message_discord ] && rm -f message_discord
+    [ -f color_me ] && rm -f color_me
+
+    # Removing duplicate paths on --cleanup
+    if [ "$1" == "-c" ] || [ "$1" == "--clean" ]; then
+        export PATH=$(echo $PATH | tr ':' '\n' | awk '!seen[$0]++' | tr '\n' ':')
+    fi
+}
+
 create_logs(){
 if [ ! -f error.log ]; then
     touch error.log
@@ -74,17 +107,14 @@ export -f log_error
 export -f log_debug
 }
 
-# Update the system
 update_system() {
     sudo apt update
 }
 
-# Upgrade the system
 upgrade_system() {
     sudo apt upgrade -y
 }
 
-# Clean up old packages
 cleanup_system() {
     sudo apt autoclean
     sudo apt autoremove -y
@@ -107,6 +137,21 @@ install_apt_libs() {
 
 # Install Golang
 install_golang() {
+    if [ "$1" == "-c" ] || [ "$1" == "--clean" ]; then
+        echo "Cleaning Go installation..."
+        # Remove Go from PATH
+        sed -i '/# Go/d' ~/.bashrc
+        sed -i '/export PATH/d' ~/.bashrc
+        sed -i '/go/d' ~/.bashrc
+        sed -i '/# Go/d' ~/.profile
+        sed -i '/export PATH/d' ~/.profile
+        sed -i '/go/d' ~/.profile
+        # Remove Go from system
+        rm -rf /usr/local/go/
+        rm -rf ~/.go/
+        color_me -c green "Go has been removed from the system"
+    fi
+
     sudo apt install golang-go -y
     if [ $? -ne 0 ]; then
         color_me -c red "Golang installation failed"
@@ -114,14 +159,14 @@ install_golang() {
     fi
 }
 
-# Add Go to PATH
 add_go_to_path() {
-    export GOPATH="$HOME/go"
-    PATH="$GOPATH/bin:$PATH" >> ~/.bashrc
+    echo 'export GOPATH=$HOME/go' >> ~/.bashrc
+    echo 'export GOBIN=$GOPATH/bin' >> ~/.bashrc
+    echo 'export PATH=$PATH:/usr/local/go/bin:$GOBIN' >> ~/.bashrc
     source ~/.bashrc
+    source ~/.profile
 }
 
-# Install missing Go libraries
 install_go_libs() {
     for lib in "${GO_LIBS[@]}"
     do
@@ -137,12 +182,11 @@ install_go_libs() {
     mkdir -p ~/.gf && cp $(find $GOPATH -name "examples")/* -type d ~/.gf/
 }
 
-# check if the Go libraries are working
 check_go_libs() {
     for lib in "${GO_LIBS[@]}"
     do
         color_me -c light-blue "Checking $lib"
-        go test $lib
+        go test $lib | sed 's/@.*//'
         if [ $? -ne 0 ]; then
             color_me -c red "$lib is not working"
             exit 1
@@ -187,16 +231,13 @@ connect_to_github() {
 }
 
 configure_github(){
-config_file=config.txt
-if [ ! -f $config_file ]; then
-  touch $config_file
-fi
+config_file="$HOME/config/credentials.conf"
 
 if grep -q "github_username" "$config_file" && grep -q "github_email" "$config_file"; then
   github_username=$(grep "github_username" $config_file | cut -d "=" -f 2)
   github_email=$(grep "github_email" $config_file | cut -d "=" -f 2)
 else
-  read -p "Enter your github username: " github_username
+  read -p "Enter your Github username that you want to use for your activities: " github_username
   read -p "Enter your GitHub email address: " github_email
 
   echo "github_username=$github_username" >> $config_file
@@ -211,18 +252,26 @@ if ! git config --global --get-all user.email | grep -q "$github_email"; then
   git config --global user.email "$github_email"
 fi
 
-connect_to_github
+    connect_to_github
+}
 
-# check if ssh connection is valid
-if [ $? -eq 1 ]; then
-  color_me -c red "Invalid ssh connection, please check your ssh key and try again"
+configure_discord(){
+# Ask user for discord webhook URL
+read -p "Please enter your discord webhook URL: " discord_webhook
+
+echo "discord_webhook=$discord_webhook" >> $HOME/config/credentials.conf
+
+response=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "{\"content\":\"Connection established from $(hostname)\"}" $discord_webhook)
+
+if [ $response -eq 204 ]; then
+    color_me -c green "Webhook established successfully."
 else
-  color_me -c green "Successfully connected to GitHub via SSH"
+    color_me -c red "Error: Webhook not established. Response code: $response"
 fi
 }
 
 get_resources(){
-mkdir -p "~/resources/"
+mkdir -p ~/resources/
 color_me -c green "Directory 'resources' created or already exists."
 
 for resource in "${RESOURCES[@]}"
@@ -238,59 +287,15 @@ do
 done
 }
 
-configure_discord(){
-# Check if config.txt exists and create it if not
-if [ ! -f config.txt ]; then
-    touch config.txt
-fi
-
-# Ask user for discord webhook URL
-read -p "Please enter your discord webhook URL: " discord_webhook
-
-# Store discord webhook URL in config.txt
-echo "discord_webhook=$discord_webhook" >> config.txt
-
-# Test webhook and send test message
-source config.txt
-response=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "{\"content\":\"Connection established from $(hostname)\"}" $discord_webhook)
-
-if [ $response -eq 204 ]; then
-    color_me -c green "Webhook established successfully."
-else
-    color_me -c red "Error: Webhook not established. Response code: $response"
-fi
-}
-
-add_scripts_to_path(){
-local scripts_path="/home/$USER/scripts/"
-local config_path="/home/$USER/config/"
-
-mkdir -p $scripts_path
-mkdir -p $config_path
-
-export PATH="$PATH:$scripts_path:$config_path"
-source /home/$USER/.bashrc
-
-cp message_discord.sh message_discord
-if [ ! -f "$scripts_path/message_discord" ]; then
-mv message_discord $scripts_path
-fi
-
-cp color_me.sh color_me
-if [ ! -f "$scripts_path/color_me" ]; then
-mv color_me $scripts_path
-fi
-}
-
 main(){
     check_executables
-    add_scripts_to_path
+    add_scripts_to_path -c
     create_logs
     update_system
     upgrade_system
     cleanup_system
     install_apt_libs
-    install_golang
+    install_golang -c
     add_go_to_path
     install_go_libs
     install_binaries
@@ -298,6 +303,7 @@ main(){
     configure_github
     configure_discord
     get_resources
+
     ./scheduler.sh
 
     message_discord "Install complete, welcome to your new environment!"

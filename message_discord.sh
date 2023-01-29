@@ -9,10 +9,10 @@ message_discord() {
 
     message=$1
 
-    # Get webhook URL from config file
-    webhook_url=$(grep "webhook_url" /home/$USER/config/config.txt | cut -d "=" -f2)
+    webhook_url=$(grep "discord_webhook" $HOME/config/credentials.conf | cut -d "=" -f2)
 
-    # Send message to Discord
+    echo $webhook_url
+
     curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"$1\"}" $webhook_url
 
     if [ $? -eq 0 ]; then

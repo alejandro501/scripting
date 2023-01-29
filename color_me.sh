@@ -1,75 +1,71 @@
 #!/bin/bash
 
-# color array
 colors=(
-  "black"
-  "red"
-  "green"
-  "yellow"
-  "blue"
-  "purple"
-  "cyan"
-  "white"
-  "light-gray"
-  "dark-gray"
-  "light-red"
-  "light-green"
-  "light-yellow"
-  "light-blue"
-  "light-purple"
-  "light-cyan"
-  "light-white"
-  "light-orange"
+  "black"        "0;30"
+  "red"          "0;31"
+  "green"        "0;32"
+  "yellow"       "0;33"
+  "blue"         "0;34"
+  "magenta"      "0;35"
+  "cyan"         "0;36"
+  "white"        "0;37"
+  "gray"         "1;30"
+  "light_red"    "1;31"
+  "light_green"  "1;32"
+  "light_yellow" "1;33"
+  "light_blue"   "1;34"
+  "light_magenta" "1;35"
+  "light_cyan"   "1;36"
+  "light_gray"   "1;37"
+  "dark_gray"    "90"
+  "dark_red"     "91"
+  "dark_green"   "92"
+  "dark_yellow"  "93"
+  "dark_blue"    "94"
+  "dark_magenta" "95"
+  "dark_cyan"    "96"
 )
 
-# function to display help message
-display_help() {
-  echo "Usage: color_me -c color string"
-  echo "Colors: ${colors[*]}"
-  echo "Example: color_me -c red This is red text"
+# Function to display text in a specific color
+color_me() {
+    color=$1
+    string=$2
+    color_index=0
+    for i in "${colors[@]}"
+    do
+        if [[ $i == $color ]]; then
+            color_index=$(($color_index + 1))
+            break
+        fi
+        color_index=$(($color_index + 1))
+    done
+
+    if [[ $color_index -eq ${#colors[@]} ]]; then
+        echo "Invalid color. Available colors: ${colors[@]}"
+    else
+        echo -e "\033[${colors[$color_index]}m$string\033[0m"
+    fi
 }
 
-# check if no arguments are passed
-if [ $# -eq 0 ]; then
-  echo "Error: No arguments provided"
-  display_help
-  exit 1
-fi
-
-# initialize variables to hold the color and string
-color=""
-string=""
-
-# loop through all arguments
-for arg in "$@"
-do
-  # check if -c or --color flag is passed
-  if [ "$arg" == "-c" ] || [ "$arg" == "--color" ]; then
-    color=$2
-  elif [[ " ${colors[@]} " =~ " ${arg} " ]]; then
-    color=$arg
-  else
-    # assume the argument is the string
-    string="$string $arg"
-  fi
+# Get the input color and string
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -c|--color)
+            color=$2
+            shift 2
+            ;;
+        -h|--help)
+            echo "Usage: color_me [color] 'text' or color_me -c [color] 'text'"
+            echo "Available colors: ${colors[@]}"
+            shift
+            exit 0
+            ;;
+        *)
+            color=$1
+            string=$2
+            shift 2
+            ;;
+    esac
 done
 
-# check if color is valid
-if [[ -z "$color" ]]; then
-  echo "Error: No color flag provided"
-  display_help
-  exit 1
-fi
-
-# check if string is passed
-if [[ -z "$string" ]]; then
-  echo "Error: No string provided"
-  display_help
-  exit 1
-fi
-
-# replace dash with underscore for color variable
-color=${color//-/_}
-
-# print string with color and reset color
-echo -e "\033[$(eval echo \$${color})m$string\033[0m"
+color_me $color "$string"
