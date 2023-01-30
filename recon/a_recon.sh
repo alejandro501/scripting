@@ -86,6 +86,8 @@ grep "api" domains.txt > api_domains.txt
 
 color_me blue "[4/] Adding new domains from findomain.txt to domains.txt, http probing, creating hosts.txt..."
 cat findomain.txt | anew domains.txt | httprobe -c 50 --prefer-https | anew hosts.txt | sort
+message_discord "Hosts for $TARGET"
+message_discord -f hosts.txt
 
 if [ -f $TARGET/out-of-scope]; then
     grep -v -F -f domains.txt $TARGET/out-of-scope > domains.txt
@@ -97,7 +99,9 @@ if [ -f $TARGET/in-scope ]; then
     cat $TARGET/in-scope | anew domains.txt
 fi
 
-grep "api" hosts.txt > api_hosts.txt
+grep "api" hosts.txt > api_hosts.txt | sort
+message_discord "Api hosts for $TARGET"
+message_discord -f api_hosts.txt
 
 color_me blue "[5/] Gathering headers/bodies to roots folder from hosts.txt..."
 cat hosts.txt | fff -d 1 -S -o roots

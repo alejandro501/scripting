@@ -13,6 +13,9 @@ raw() {
           echo "$modified_line" >> $TARGET/dorking/"${keyword}_raw.txt"
         done < $DORKING/github_keywords.txt
    fi
+
+   message_discord "Github Dork links raw for $keyword of $TARGET"
+   message_discord -f $TARGET/dorking/"${keyword}_raw.txt"
 }
 
 verbose() {
@@ -29,6 +32,9 @@ verbose() {
         fi
       done < $DORKING/github_keywords.txt
     fi
+
+    message_discord "Github Dork links raw for $keyword of $TARGET"
+   message_discord -f $TARGET/dorking/"${keyword}_verbose.txt"
 }
 
 main() {
