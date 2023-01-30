@@ -209,10 +209,12 @@ do
         cd ..
         rm -rf ffuf*
     elif [[ $url == *"findomain"* ]]; then
-        wget $url -O $filename
-        unzip $filename
-        rm -f $filename
-        mv findomain-linux-i386 /usr/local/bin/findomain
+        curl -LO https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip
+        unzip findomain-linux-i386.zip
+        chmod +x findomain
+        sudo mv findomain /usr/bin/findomain
+        findomain --help
+        color_me dark_yellow "findomain installed."
     fi
 done
 }
