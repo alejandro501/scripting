@@ -1,27 +1,60 @@
 #!/bin/bash
 
-message_discord() {
-    local message=$1
+WEBHOOK_URL=$(grep "discord_webhook" $HOME/config/credentials.conf | cut -d "=" -f2 | tr -d '[:space:]')
 
-    if [[ $1 == "-h" || $1 == "--help" || $# -ne 1 ]]; then
-        echo "Usage: message_discord [message]"
-        echo "Sends a message to a Discord channel via a Webhook."
-        return
-    fi
-
-    webhook_url=$(grep "discord_webhook" $HOME/config/credentials.conf | cut -d "=" -f2 | tr -d '[:space:]')
-
-    if [ ! -z "$webhook_url" ]; then
-      curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"$1\"}" "$webhook_url"
+send_string() {
+      curl -H "Content-Type: application/json" -X POST -d "{\"content\":\"$1\"}" $WEBHOOK_URL
 
       if [ $? -eq 0 ]; then
-        color_me dark_magenta "Discord message sent successfully."
+        color_me dark_magenta "String message sent successfully."
       else
-        color_me red "Error sending discord message."
+        dark_magenta "Error sending string message."
       fi
-    else
-      color_me red "Error: discord_webhook value not found in $HOME/config/credentials.conf."
-fi
 }
 
-message_discord "$@"
+    # Function to send file as a message
+    send_file() {
+      curl -H "Content-Type: multipart/form-data" -F "file=@$1" $WEBHOOK_URL
+
+      if [ $? -eq 0 ]; then
+        echo "File message sent successfully."
+      else
+        echo "Error sending file message."
+      fi
+    }
+
+help_message() {
+  echo "Usage: message_discord [-f FILE | -s STRING | -h]"
+  echo "Options:"
+  echo "  -f, --file      Send a file message to Discord"
+  echo "  -s, --string    Send a string message to Discord"
+  echo "  -h, --help      Show this help message"
+}
+
+main() {
+    if [ $# -eq 0 ]; then
+      send_string "$1"
+    else
+      while [ $# -gt 0 ]; do
+        case "$1" in
+          -f|--file)
+            send_file "$2"
+            shift 2
+            ;;
+          -s|--string)
+            send_string "$2"
+            shift 2
+            ;;
+          -h|--help)
+            help_message
+            exit 0
+            ;;
+          *)
+            send_string "$1"
+            shift 1
+            ;;
+        esac
+      done
+    fi
+}
+main "$@"

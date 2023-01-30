@@ -233,6 +233,41 @@ connect_to_github() {
   ssh -T git@github.com -o "StrictHostKeyChecking no"
 }
 
+clean_duplicates(){
+    file_path=$1
+
+    # Check if the file exists
+    if [ ! -f $file_path ]; then
+      echo "Error: The file $file_path does not exist."
+      exit 1
+    fi
+
+    # Create a temporary file to store the unique key-value pairs
+    tmp_file=$(mktemp)
+
+    # Iterate through each line of the input file
+    while read line; do
+      # Extract the key and value from the line
+      key=$(echo $line | cut -d '=' -f1)
+      value=$(echo $line | cut -d '=' -f2)
+
+      # Check if the key has already been added to the temporary file
+      if ! grep -q "^$key=" $tmp_file; then
+        # If not, add the key-value pair to the temporary file
+        echo "$key=$value" >> $tmp_file
+      fi
+    done < $file_path
+
+    # Overwrite the original file with the unique key-value pairs
+    cat $tmp_file > $file_path
+
+    # Clean up the temporary file
+    rm $tmp_file
+
+    # Confirm that the file has been processed
+    echo "Duplicate keys removed from $file_path."
+}
+
 configure_github(){
 config_file="$HOME/config/credentials.conf"
 
@@ -256,21 +291,24 @@ if ! git config --global --get-all user.email | grep -q "$github_email"; then
 fi
 
     connect_to_github
+    clean_duplicates $config_file
 }
 
 configure_discord(){
-# Ask user for discord webhook URL
-read -p "Please enter your discord webhook URL: " discord_webhook
+    # Ask user for discord webhook URL
+    read -p "Please enter your discord webhook URL: " discord_webhook
 
-echo "discord_webhook=$discord_webhook" >> $HOME/config/credentials.conf
+    echo "discord_webhook=$discord_webhook" >> $HOME/config/credentials.conf
 
-response=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "{\"content\":\"Connection established from $(hostname)\"}" $discord_webhook)
+    response=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "{\"content\":\"Connection established from $(hostname)\"}" $discord_webhook)
 
-if [ $response -eq 204 ]; then
-    color_me green "Webhook established successfully."
-else
-    color_me red "Error: Webhook not established. Response code: $response"
-fi
+    if [ $response -eq 204 ]; then
+        color_me green "Webhook established successfully."
+    else
+        color_me red "Error: Webhook not established. Response code: $response"
+    fi
+
+    clean_duplicates $config_file
 }
 
 get_resources(){
