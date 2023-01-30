@@ -1,6 +1,11 @@
 #!/bin/bash
 
-APT_LIBS=()
+########################################################################################
+# Fix them if you have time:                                                           #
+# adding bin to path issue // simply not adding paths even tho the syntax is right.    #
+########################################################################################
+
+APT_LIBS=(  "unzip"   )
 
 # httprobe: only master has the --prefer-https flag as of today
 # ffuf install issue!
@@ -21,7 +26,7 @@ RESOURCES=("https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configf
           )
 
 BINARIES=("https://github.com/ffuf/ffuf/releases/tag/v1.5.0"
-           "https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip"
+          "https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip"
           )
 
 # Test function that generates an error
@@ -287,7 +292,7 @@ main(){
     local dir=$PWD
 
     check_executables
-    add_bin_to_path -c
+    add_bin_to_path
     create_logs
     update_system
     upgrade_system
