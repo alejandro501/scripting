@@ -27,14 +27,14 @@ BINARIES=("https://github.com/ffuf/ffuf/releases/tag/v1.5.0"
 # Test function that generates an error
 test_error_function() {
     # Some code that generates an error
-    color_me -c light-orange "This is a test function testing error log."
+    color_me orange "This is a test function testing error log."
     non_existent_command
 }
 
 # Test function that generates debug messages
 test_debug_function() {
     # Some code that generates a debug message
-    color_me -c light-orange "This is a test function"
+    color_me orange "This is a test function"
     log_debug "Debug message in test function" "$(basename "$0")" "test_debug_function"
 }
 
@@ -43,7 +43,7 @@ log_error() {
     error_message=$1
     error_file=$2
     error_function=$3
-    color_me -c red "$(date +%Y-%m-%d\ %H:%M:%S) - $error_file - $error_function - $error_message" >> error.log
+    color_me red "$(date +%Y-%m-%d\ %H:%M:%S) - $error_file - $error_function - $error_message" >> error.log
 }
 
 # Define a global function that logs debug messages
@@ -52,38 +52,34 @@ log_debug() {
     debug_file=$2
     debug_function=$3
     if [ "$LOG_LEVEL" == "debug" ]; then
-        color_me -c light-orange "$(date +%Y-%m-%d\ %H:%M:%S) - $debug_file - $debug_function - $debug_message" >> debug.log
+        color_me orange "$(date +%Y-%m-%d\ %H:%M:%S) - $debug_file - $debug_function - $debug_message" >> debug.log
     fi
 }
 
 add_scripts_to_path(){
-    local scripts_path="$HOME/scripts/"
+    local_bin="$PWD/bin"
+
+    local bin_path="$HOME/bin/"
     local config_path="$HOME/config/"
 
-    mkdir -p $scripts_path
+    mkdir -p $bin_path
     mkdir -p $config_path
 
-    export PATH=$PATH:$HOME/scripts:$HOME/config
-    echo "export PATH=$PATH:$HOME/scripts:$HOME/config" >> ~/.bashrc
+    export PATH=$PATH:$HOME/bin:$HOME/config
+    echo "export PATH=$PATH:$HOME/bin:$HOME/config" >> ~/.bashrc
     source ~/.bashrc
     source ~/.profile
 
     touch $config_path/credentials.conf
 
-    cp message_discord.sh message_discord
+    for filename in $local_bin/*.sh; do
+      basename=$(basename "$filename" .sh)
+      if [ -e "$bin_path/$basename" ]; then
+        rm "$bin_path/$basename"
+      fi
 
-    if [ ! -f "$scripts_path/message_discord" ]; then
-    mv message_discord $scripts_path
-    fi
-
-    cp color_me.sh color_me
-    if [ ! -f "$scripts_path/color_me" ]; then
-    mv color_me $scripts_path
-    fi
-
-    # cleanup
-    [ -f message_discord ] && rm -f message_discord
-    [ -f color_me ] && rm -f color_me
+      cp "$filename" "$bin_path/$basename"
+    done
 
     # Removing duplicate paths on --cleanup
     if [ "$1" == "-c" ] || [ "$1" == "--clean" ]; then
@@ -125,10 +121,10 @@ install_apt_libs() {
     for lib in "${APT_LIBS[@]}"
     do
         if ! dpkg-query -W -f='${Status}' $lib 2>/dev/null | grep "ok installed" > /dev/null; then
-            color_me -c light-blue "Installing $lib"
+            color_me blue "Installing $lib"
             sudo apt install -y $lib
             if [ $? -ne 0 ]; then
-                color_me -c red "$lib installation failed"
+                color_me red "$lib installation failed"
                 exit 1
             fi
         fi
@@ -149,12 +145,12 @@ install_golang() {
         # Remove Go from system
         rm -rf /usr/local/go/
         rm -rf ~/.go/
-        color_me -c green "Go has been removed from the system"
+        color_me green "Go has been removed from the system"
     fi
 
     sudo apt install golang-go -y
     if [ $? -ne 0 ]; then
-        color_me -c red "Golang installation failed"
+        color_me red "Golang installation failed"
         exit 1
     fi
 }
@@ -170,10 +166,10 @@ add_go_to_path() {
 install_go_libs() {
     for lib in "${GO_LIBS[@]}"
     do
-        color_me -c light-blue "Installing $lib"
+        color_me blue "Installing $lib"
         go install $lib
         if [ $? -ne 0 ]; then
-            color_me -c red "$lib installation failed"
+            color_me red "$lib installation failed"
             exit 1
         fi
     done
@@ -185,10 +181,10 @@ install_go_libs() {
 check_go_libs() {
     for lib in "${GO_LIBS[@]}"
     do
-        color_me -c light-blue "Checking $lib"
+        color_me blue "Checking $lib"
         go test $lib | sed 's/@.*//'
         if [ $? -ne 0 ]; then
-            color_me -c red "$lib is not working"
+            color_me red "$lib is not working"
             exit 1
         fi
     done
@@ -264,15 +260,15 @@ echo "discord_webhook=$discord_webhook" >> $HOME/config/credentials.conf
 response=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" -d "{\"content\":\"Connection established from $(hostname)\"}" $discord_webhook)
 
 if [ $response -eq 204 ]; then
-    color_me -c green "Webhook established successfully."
+    color_me green "Webhook established successfully."
 else
-    color_me -c red "Error: Webhook not established. Response code: $response"
+    color_me red "Error: Webhook not established. Response code: $response"
 fi
 }
 
 get_resources(){
 mkdir -p ~/resources/
-color_me -c green "Directory 'resources' created or already exists."
+color_me green "Directory 'resources' created or already exists."
 
 for resource in "${RESOURCES[@]}"
 do
@@ -288,6 +284,8 @@ done
 }
 
 main(){
+    local dir=$PWD
+
     check_executables
     add_scripts_to_path -c
     create_logs
@@ -304,6 +302,7 @@ main(){
     configure_discord
     get_resources
 
+    cd $dir
     ./scheduler.sh
 
     message_discord "Install complete, welcome to your new environment!"

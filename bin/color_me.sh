@@ -41,7 +41,7 @@ color_me() {
     done
 
     if [[ $color_index -eq ${#colors[@]} ]]; then
-        echo "Invalid color. Available colors: ${colors[@]}"
+        echo "Invalid color $color_index. Available colors: ${colors[@]}"
     else
         echo -e "\033[${colors[$color_index]}m$string\033[0m"
     fi
