@@ -56,7 +56,7 @@ log_debug() {
     fi
 }
 
-add_scripts_to_path(){
+add_bin_to_path(){
     local_bin="$PWD/bin"
 
     local bin_path="$HOME/bin/"
@@ -287,7 +287,7 @@ main(){
     local dir=$PWD
 
     check_executables
-    add_scripts_to_path -c
+    add_bin_to_path -c
     create_logs
     update_system
     upgrade_system
