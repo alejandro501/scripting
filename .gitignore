@@ -8,9 +8,9 @@
 debug.log
 error.log
 
-target_list
-targets/*
+recon/target_list
+recon/targets/*
 
-!sample_target_list
-!targets/sample-target-1/
-!targets/sample-target-2/
+recon/sample_target_list
+recon/targets/sample-target-1/*
+recon/targets/sample-target-2/*
