@@ -3,6 +3,8 @@
 ########################################################################################
 # Fix them if you have time:                                                           #
 # adding bin to path issue // simply not adding paths even tho the syntax is right.    #
+# add kiterunner.                                                                      #
+##### https://github.com/assetnote/kiterunner#installation                             #
 ########################################################################################
 
 APT_LIBS=(  "unzip"   )
@@ -27,6 +29,7 @@ RESOURCES=("https://raw.githubusercontent.com/tomnomnom/meg/master/lists/configf
 
 BINARIES=("https://github.com/ffuf/ffuf/releases/tag/v1.5.0"
           "https://github.com/findomain/findomain/releases/latest/download/findomain-linux-i386.zip"
+          "https://github.com/assetnote/kiterunner/releases/download/v1.0.2/kiterunner_1.0.2_linux_386.tar.gz"
           )
 
 # Test function that generates an error
@@ -215,6 +218,28 @@ do
         sudo mv findomain /usr/bin/findomain
         findomain --help
         color_me dark_yellow "findomain installed."
+    elif [[ $url == *"kiterunner"* ]]; then
+        wget $url
+        tar -xf $filename
+        # build the binary
+        make build
+        sudo mv $(pwd)/kr /usr/local/bin/kr
+        rm $filename
+
+        #download and compile the wordlists
+        mkdir -p $HOME/resources/kr
+
+        wget https://wordlists-cdn.assetnote.io/data/kiterunner/routes-small.kite.tar.gz
+        tar -xf routes-small.kite.tar.gz
+        mv routes-small.kite $HOME/resources/kr
+        rm routes-small.kite.tar.gz
+
+        wget https://wordlists-cdn.assetnote.io/data/kiterunner/routes-large.kite.tar.gz
+        tar -xf routes-large.kite.tar.gz
+        mv routes-large.kite $HOME/resources/kr
+        rm routes-large.kite.tar.gz
+
+        color_me dark_yellow "kiterunner installed, resources extracted."
     fi
 done
 }
@@ -334,6 +359,7 @@ main(){
     check_executables
     add_bin_to_path
     create_logs
+    get_resources
     update_system
     upgrade_system
     cleanup_system
@@ -345,7 +371,6 @@ main(){
     check_go_libs
     configure_github
     configure_discord
-    get_resources
 
     cd $dir
     ./scheduler.sh
