@@ -14,3 +14,5 @@ recon/targets/*
 recon/sample_target_list
 recon/targets/sample-target-1/*
 recon/targets/sample-target-2/*
+
+tools/keylogger/smtp.txt
